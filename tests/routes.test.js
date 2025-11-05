@@ -37,8 +37,8 @@ describe(" Test cases for Routes", function () {
 
     await userA.jar.setCookie(`token=${token}`, BASE_URL);
 
-    testUserA = user;
-    testDogA = newDog;
+    testUserA = JSON.parse(JSON.stringify(user));
+    testDogA = JSON.parse(JSON.stringify(newDog));
   });
 
   after(async function () {
@@ -158,6 +158,7 @@ describe(" Test cases for Routes", function () {
     const response = await userA.client.delete(
       `${BASE_URL}/dogs/${testDogA.uuid}`
     );
+    expect(response.status).to.equal(200);
     expect(response.data.message).to.include(testDogA.uuid);
     const dog = await Dog.findOne({ uuid: testDogA.uuid });
     expect(dog).to.not.exist;
@@ -199,6 +200,7 @@ describe(" Test cases for Routes", function () {
       `${BASE_URL}/dogs/adopt/${testDogA.uuid}`,
       { message: "Big thanks for dog" }
     );
+    expect(response.status).to.equal(200);
     expect(response.data.message).to.equal(
       `${user.username} successfully adopted ${testDogA.name}`
     );
@@ -236,8 +238,9 @@ describe(" Test cases for Routes", function () {
 
   it(`GET /users/dogs/registered should return the list of dogs the user has registered`, async () => {
     const response = await userA.client(`${BASE_URL}/users/dogs/registered`);
+    expect(response.status).to.equal(200);
     expect(response.data.dogs.length).to.equal(1);
-    expect(response.data);
+    expect(response.data.dogs).to.deep.equal([testDogA]);
   });
   it(`GET /users/dogs/registered should return the second page of the list of dogs the user has registered `, async () => {
     // Creates newDog to test pagination and limit features
@@ -246,6 +249,7 @@ describe(" Test cases for Routes", function () {
     const response = await userA.client(
       `${BASE_URL}/users/dogs/registered?limit=1&page=2`
     );
+    expect(response.status).to.equal(200);
     expect(response.data.dogs.length).to.equal(1);
     expect(response.data.dogs[0].uuid).to.equal(newDog.uuid);
   });
@@ -257,11 +261,13 @@ describe(" Test cases for Routes", function () {
     const response = await userA.client(
       `${BASE_URL}/users/dogs/registered?filter=adopted`
     );
+    expect(response.status).to.equal(200);
     expect(response.data.dogs.length).to.equal(0);
 
     const response1 = await userA.client(
       `${BASE_URL}/users/dogs/registered?filter=available`
     );
+    expect(response.status).to.equal(200);
     expect(response1.data.dogs.length).to.equal(2);
   });
 
@@ -291,11 +297,13 @@ describe(" Test cases for Routes", function () {
     );
 
     const response = await userA.client.get(`${BASE_URL}/users/dogs/adopted`);
+    expect(response.status).to.equal(200);
     expect(response.data.dogs.length).to.equal(2);
 
     const response1 = await userA.client.get(
       `${BASE_URL}/users/dogs/adopted?page=2&limit=1`
     );
+    expect(response.status).to.equal(200);
     expect(response1.data.dogs.length).to.equal(1);
     expect(response1.data.dogs[0].uuid).to.equal(newDog.uuid);
   });
